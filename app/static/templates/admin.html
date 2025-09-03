@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Obesity App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { background-color: #f0f4f8; }
+        .box { border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .hero.is-primary { background-image: linear-gradient(to right, #6a11cb 0%, #2575fc 100%); }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+        <div class="container">
+            <div class="navbar-brand">
+                <a class="navbar-item is-size-4 has-text-weight-bold" href="/">Obesity App</a>
+            </div>
+            <div class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item" href="app_obesity.html">
+                        <span class="icon-text">
+                            <span class="icon"><i class="fas fa-chart-line"></i></span>
+                            <span>Prédiction</span>
+                        </span>
+                    </a>
+                </div>
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a id="admin-btn" class="button is-warning" href="admin.html">
+                                <span class="icon"><i class="fas fa-user-shield"></i></span>
+                                <strong>Admin</strong>
+                            </a>
+                            <a id="logout-btn" class="button is-danger" href="#" onclick="logout()">
+                                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span>Déconnexion</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main class="section">
+        <div class="container is-max-widescreen">
+            <h1 class="title has-text-centered">Tableau de Bord Administrateur</h1>
+            <div class="columns">
+                <div class="column is-one-quarter">
+                    <div class="box">
+                        <h2 class="title is-5">Statistiques</h2>
+                        <div class="content">
+                            <p><strong>Utilisateurs totaux:</strong> <span id="totalUsers"></span></p>
+                            <p><strong>Prédictions totales:</strong> <span id="totalPredictions"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="box">
+                        <h2 class="title is-5">Gestion des utilisateurs</h2>
+                        <div class="table-container">
+                            <table class="table is-striped is-hoverable is-fullwidth" id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nom d'utilisateur</th>
+                                        <th>Email</th>
+                                        <th>Rôle</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    </tbody>
+                            </table>
+                        </div>
+                        <div id="usersMessage" class="notification is-info is-hidden">
+                            Aucun utilisateur trouvé.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const token = localStorage.getItem('access_token');
+        const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
+
+        // Vérification de l'authentification et du rôle
+        if (!token || !payload || payload.role !== 'admin') {
+            window.location.href = 'login.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.href = 'login.html';
+        }
+
+        async function fetchStats() {
+            try {
+                const response = await fetch('/admin/stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const stats = await response.json();
+                document.getElementById('totalUsers').textContent = stats.total_users;
+                document.getElementById('totalPredictions').textContent = stats.total_predictions;
+            } catch (error) {
+                console.error("Erreur de chargement des statistiques", error);
+            }
+        }
+
+        async function fetchUsers() {
+            try {
+                const response = await fetch('/admin/users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const users = await response.json();
+                const usersTableBody = document.querySelector('#usersTable tbody');
+                usersTableBody.innerHTML = '';
+                if (users.users.length > 0) {
+                    users.users.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td>${user.role}</td>
+                            <td>
+                                <button class="button is-danger is-small delete-user-btn" data-id="${user.id}">Supprimer</button>
+                            </td>
+                        `;
+                        usersTableBody.appendChild(row);
+                    });
+                    document.getElementById('usersMessage').classList.add('is-hidden');
+                } else {
+                    document.getElementById('usersMessage').classList.remove('is-hidden');
+                }
+            } catch (error) {
+                console.error("Erreur de chargement des utilisateurs", error);
+            }
+        }
+
+        document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-user-btn')) {
+                const userId = e.target.dataset.id;
+                const confirmation = confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?");
+                if (confirmation) {
+                    try {
+                        const response = await fetch(`/admin/users/${userId}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (response.ok) {
+                            alert("Utilisateur supprimé avec succès.");
+                            fetchUsers();
+                            fetchStats();
+                        } else {
+                            const errorData = await response.json();
+                            alert(`Erreur: ${errorData.detail}`);
+                        }
+                    } catch (error) {
+                        alert("Erreur lors de la suppression.");
+                    }
+                }
+            }
+        });
+
+        fetchStats();
+        fetchUsers();
+    </script>
+</body>
+</html>

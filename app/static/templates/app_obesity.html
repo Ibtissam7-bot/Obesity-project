@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Obesity App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f0f4f8; }
+        .box { border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .hero.is-primary { background-image: linear-gradient(to right, #6a11cb 0%, #2575fc 100%); }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+        <div class="container">
+            <div class="navbar-brand">
+                <a class="navbar-item is-size-4 has-text-weight-bold" href="/">Obesity App</a>
+            </div>
+            <div class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item" href="app_obesity.html">
+                        <span class="icon-text">
+                            <span class="icon"><i class="fas fa-chart-line"></i></span>
+                            <span>Prédiction</span>
+                        </span>
+                    </a>
+                </div>
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a id="admin-btn" class="button is-warning is-hidden" href="admin.html">
+                                <span class="icon"><i class="fas fa-user-shield"></i></span>
+                                <strong>Admin</strong>
+                            </a>
+                            <a id="logout-btn" class="button is-danger is-hidden" href="#" onclick="logout()">
+                                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span>Déconnexion</span>
+                            </a>
+                            <a id="login-btn" class="button is-light is-hidden" href="login.html">
+                                <span class="icon"><i class="fas fa-sign-in-alt"></i></span>
+                                <strong>Connexion</strong>
+                            </a>
+                            <a id="register-btn" class="button is-link is-hidden" href="register.html">
+                                <span class="icon"><i class="fas fa-user-plus"></i></span>
+                                <strong>Inscription</strong>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main class="section">
+        <div class="container is-max-widescreen">
+            <div class="columns">
+                <div class="column is-one-third">
+                    <div class="box">
+                        <h2 class="title is-4 has-text-primary"><i class="fas fa-chart-line"></i> Faire une prédiction</h2>
+                        <p class="subtitle is-6">Entrez vos données pour évaluer votre risque d'obésité.</p>
+                        <form id="predictionForm">
+                            <div class="field">
+                                <label class="label">Âge</label>
+                                <div class="control"><input class="input" type="number" id="Age" required></div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Taille (cm)</label>
+                                <div class="control"><input class="input" type="number" step="0.01" id="Height" required></div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Poids (kg)</label>
+                                <div class="control"><input class="input" type="number" step="0.01" id="Weight" required></div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Antécédent d'obésité familial (0 ou 1)</label>
+                                <div class="control"><input class="input" type="number" id="history" min="0" max="1" required></div>
+                            </div>
+                            <div class="field">
+                                <div class="control">
+                                    <button class="button is-primary is-fullwidth is-medium" type="submit">
+                                        <span class="icon"><i class="fas fa-flask"></i></span>
+                                        <span>Prédire</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="predictionMessage" class="notification is-hidden mt-3"></div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="column is-two-thirds">
+                    <div class="box mb-5 is-hidden" id="resultBox">
+                        <h2 class="title is-4 has-text-success"><i class="fas fa-check-circle"></i> Résultat de la prédiction</h2>
+                        <div class="columns is-vcentered">
+                            <div class="column">
+                                <p class="is-size-5 has-text-weight-bold mb-2">Classe prédite : <span id="predictedClass" class="has-text-link"></span></p>
+                                <p class="is-size-6">Confiance : <span id="confidence"></span>%</p>
+                            </div>
+                            <div class="column">
+                                <canvas id="probabilitiesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="box" id="historyBox">
+                        <h2 class="title is-4 has-text-info"><i class="fas fa-history"></i> Historique de vos prédictions</h2>
+                        <div class="table-container">
+                            <table class="table is-striped is-hoverable is-fullwidth">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Prédiction</th>
+                                        <th>Confiance</th>
+                                        <th>Données d'entrée</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                        <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+                            <a class="pagination-previous" id="prevPageBtn">Précédent</a>
+                            <a class="pagination-next" id="nextPageBtn">Suivant</a>
+                            <ul class="pagination-list">
+                                <li><span class="pagination-link is-current" id="currentPage">1</span></li>
+                            </ul>
+                        </nav>
+                        <p id="totalPredictionsText" class="has-text-centered is-size-7 mt-2">Total : <span id="totalPredictionsCount">0</span> prédictions</p>
+                        <div id="historyMessage" class="notification is-warning is-hidden mt-3">
+                            Aucun historique de prédiction trouvé.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Vérification de l'authentification et redirection
+        const token = localStorage.getItem('access_token');
+        if (!token) { window.location.href = 'login.html'; }
+
+        // Fonction pour gérer la déconnexion
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.href = 'login.html';
+        }
+
+        // Gestion de l'affichage des boutons en fonction du token
+        const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
+        if (token) {
+            document.getElementById('logout-btn').classList.remove('is-hidden');
+            if (payload && payload.role === 'admin') {
+                document.getElementById('admin-btn').classList.remove('is-hidden');
+            }
+        }
+        
+        // Code pour le formulaire et l'historique (identique à la version précédente)
+        let currentPage = 1;
+        const limit = 5;
+
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                Age: parseFloat(document.getElementById('Age').value),
+                Height: parseFloat(document.getElementById('Height').value),
+                Weight: parseFloat(document.getElementById('Weight').value),
+                history: parseFloat(document.getElementById('history').value)
+            };
+            const messageDiv = document.getElementById('predictionMessage');
+            try {
+                const response = await fetch('/predict/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    document.getElementById('resultBox').classList.remove('is-hidden');
+                    document.getElementById('predictedClass').textContent = result.predicted_class;
+                    document.getElementById('confidence').textContent = (result.confidence_percentage).toFixed(2);
+                    
+                    const ctx = document.getElementById('probabilitiesChart').getContext('2d');
+                    const labels = Object.keys(result.all_probabilities);
+                    const data = Object.values(result.all_probabilities);
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: { labels, datasets: [{ label: 'Probabilité', data }] },
+                        options: { responsive: true }
+                    });
+
+                    fetchPredictionHistory(1);
+                } else {
+                    messageDiv.textContent = result.detail;
+                    messageDiv.classList.remove('is-hidden');
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Erreur lors de la communication avec l\'API.';
+                messageDiv.classList.remove('is-hidden');
+            }
+        });
+
+        async function fetchPredictionHistory(page = 1) {
+            const skip = (page - 1) * limit;
+            try {
+                const response = await fetch(`/predict/history?skip=${skip}&limit=${limit}`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const history = await response.json();
+                const historyTableBody = document.getElementById('historyTableBody');
+                historyTableBody.innerHTML = '';
+                
+                if (history.predictions.length > 0) {
+                    history.predictions.forEach(p => {
+                        const row = document.createElement('tr');
+                        const date = new Date(p.created_at).toLocaleDateString('fr-FR');
+                        row.innerHTML = `
+                            <td>${date}</td>
+                            <td>${p.predicted_class}</td>
+                            <td>${(p.confidence_percentage).toFixed(2)}%</td>
+                            <td><pre>${JSON.stringify(p.input_features, null, 2)}</pre></td>
+                        `;
+                        historyTableBody.appendChild(row);
+                    });
+                    document.getElementById('historyMessage').classList.add('is-hidden');
+                } else {
+                    document.getElementById('historyMessage').classList.remove('is-hidden');
+                }
+                
+                document.getElementById('totalPredictionsCount').textContent = history.total;
+                document.getElementById('currentPage').textContent = page;
+                document.getElementById('prevPageBtn').disabled = page === 1;
+                document.getElementById('nextPageBtn').disabled = (page * limit) >= history.total;
+
+            } catch (error) {
+                console.error('Erreur lors de la récupération de l\'historique:', error);
+                document.getElementById('historyMessage').textContent = 'Erreur lors du chargement de l\'historique.';
+                document.getElementById('historyMessage').classList.remove('is-hidden');
+            }
+        }
+
+        document.getElementById('prevPageBtn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchPredictionHistory(currentPage);
+            }
+        });
+
+        document.getElementById('nextPageBtn').addEventListener('click', () => {
+            currentPage++;
+            fetchPredictionHistory(currentPage);
+        });
+
+        fetchPredictionHistory();
+    </script>
+</body>
+</html>

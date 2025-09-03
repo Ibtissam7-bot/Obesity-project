@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Obesity App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { background-color: #f0f4f8; }
+        .box { border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .hero.is-primary { background-image: linear-gradient(to right, #6a11cb 0%, #2575fc 100%); }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+        <div class="container">
+            <div class="navbar-brand">
+                <a class="navbar-item is-size-4 has-text-weight-bold" href="/">Obesity App</a>
+            </div>
+            <div class="navbar-menu">
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a class="button is-link" href="register.html">
+                                <span class="icon"><i class="fas fa-user-plus"></i></span>
+                                <strong>Inscription</strong>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main class="section">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-4">
+                    <div class="card box has-text-centered">
+                        <h1 class="title is-3 has-text-primary">
+                            <span class="icon-text">
+                                <span class="icon is-medium"><i class="fas fa-user-circle"></i></span>
+                                <span>Connexion</span>
+                            </span>
+                        </h1>
+                        <p class="subtitle is-6 has-text-grey">Entrez vos informations pour accéder à l'application.</p>
+                        <form id="loginForm">
+                            <div class="field">
+                                <div class="control has-icons-left">
+                                    <input class="input is-medium" type="text" placeholder="Nom d'utilisateur" id="username" required>
+                                    <span class="icon is-left"><i class="fas fa-user"></i></span>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <div class="control has-icons-left">
+                                    <input class="input is-medium" type="password" placeholder="Mot de passe" id="password" required>
+                                    <span class="icon is-left"><i class="fas fa-lock"></i></span>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <button class="button is-primary is-fullwidth is-medium" type="submit">
+                                    <span class="icon"><i class="fas fa-sign-in-alt"></i></span>
+                                    <span>Se connecter</span>
+                                </button>
+                            </div>
+                            <p class="has-text-centered">
+                                Pas encore de compte ? <a href="register.html">Inscrivez-vous ici</a>.
+                            </p>
+                            <div id="message" class="notification is-danger is-hidden mt-3"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('access_token', data.access_token);
+                    window.location.href = 'app_obesity.html';
+                } else {
+                    messageDiv.textContent = data.detail;
+                    messageDiv.classList.remove('is-hidden');
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Une erreur est survenue. Veuillez réessayer.';
+                messageDiv.classList.remove('is-hidden');
+            }
+        });
+    </script>
+</body>
+</html>
