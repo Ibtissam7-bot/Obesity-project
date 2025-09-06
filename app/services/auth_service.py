@@ -9,12 +9,13 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy import func
 
 from app.config import settings
 from app.models.user import User
-from app.schemas.user import TokenData
+from app.schemas.user import TokenData, UserCreate
 
-# Configuration pour le hashage des mots de passe
+# Configuration pour le hachage des mots de passe
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Configuration pour récupérer le token Bearer
@@ -66,7 +67,7 @@ class AuthService:
     @staticmethod
     def verify_token(token: str) -> TokenData:
         """
-        Vérifie et decode un token JWT
+        Vérifie et décode un token JWT
         
         Args:
             token: Token JWT à vérifier
@@ -116,18 +117,66 @@ class AuthService:
         Returns:
             User si authentification réussie, None sinon
         """
-        user = db.query(User).filter(User.username == username).first()
+        # Affiche le nom d'utilisateur tel qu'il a été reçu par l'API
+        print(f"Débogage : tentative d'authentification pour l'utilisateur '{username}'")
+
+        # Recherche l'utilisateur de manière insensible à la casse
+        user = db.query(User).filter(func.lower(User.username) == func.lower(username)).first()
         
+        # Étape 1 : Vérifie si l'utilisateur existe
         if not user:
+            print("Débogage : Utilisateur non trouvé dans la base de données.")
             return None
-            
+        
+        # Étape 2 : Vérifie le mot de passe
+        print(f"Débogage : Mot de passe clair fourni : {password}")
+        print(f"Débogage : Mot de passe haché de la base de données : {user.hashed_password}")
+        
         if not AuthService.verify_password(password, user.hashed_password):
+            print("Débogage : Échec de la vérification du mot de passe.")
             return None
             
         if not user.is_active:
+            print("Débogage : Utilisateur non actif.")
             return None
             
+        print("Débogage : Authentification réussie.")
         return user
+
+# --- Fonctions de service ---
+def create_user(db: Session, user: UserCreate) -> User:
+    """
+    Crée et enregistre un nouvel utilisateur dans la base de données.
+    
+    Args:
+        db: Session de base de données
+        user: Schéma Pydantic UserCreate avec les données utilisateur
+        
+    Returns:
+        L'objet User créé
+    """
+    # Hashe le mot de passe avant de l'enregistrer
+    hashed_password = AuthService.hash_password(user.password)
+    print(f"Débogage : Mot de passe clair à hacher : {user.password}")
+    print(f"Débogage : Mot de passe haché pour l'enregistrement : {hashed_password}")
+    
+    # Crée une nouvelle instance du modèle User
+    db_user = User(
+        username=user.username,
+        email=user.email,  # <-- L'email est maintenant passé ici
+        hashed_password=hashed_password
+    )
+    
+    # Ajoute le nouvel utilisateur à la session de la base de données
+    db.add(db_user)
+    
+    # Sauvegarde l'utilisateur dans la base de données
+    db.commit()
+    
+    # Rafraîchit l'objet pour obtenir les données générées (ex: l'ID)
+    db.refresh(db_user)
+    
+    return db_user
 
 # --- Dépendances FastAPI ---
 

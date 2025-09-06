@@ -3,171 +3,499 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration - Obesity App</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Administration - Obesity Prediction</title>
     <style>
-        body { background-color: #f0f4f8; }
-        .box { border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
-        .hero.is-primary { background-image: linear-gradient(to right, #6a11cb 0%, #2575fc 100%); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .nav {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .nav a, .nav button {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .users-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .user-table th {
+            background: #667eea;
+            color: white;
+        }
+        
+        .user-table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .btn {
+            padding: 5px 10px;
+            margin: 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: black;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-inactive {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .role-admin {
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+        
+        .role-user {
+            background: #6c757d;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
-        <div class="container">
-            <div class="navbar-brand">
-                <a class="navbar-item is-size-4 has-text-weight-bold" href="/">Obesity App</a>
+    <div class="container">
+        <div class="header">
+            <h1>Administration</h1>
+            <p>Gestion des utilisateurs et statistiques</p>
+            <p id="adminWelcome" class="hidden">Admin: <span id="currentAdmin"></span></p>
+        </div>
+        
+        <div class="nav">
+            <a href="/pages/login">Login</a>
+            <a href="/pages/app">Prédiction</a>
+            <button onclick="loadStats()">Actualiser</button>
+            <button onclick="logout()">Déconnexion</button>
+            <a href="/docs">API Docs</a>
+        </div>
+        
+        <div class="content">
+            <div id="alert" class="alert"></div>
+            
+            <div id="accessDenied" class="hidden" style="text-align: center; padding: 40px;">
+                <h3>Accès refusé</h3>
+                <p>Vous devez être connecté en tant qu'administrateur pour accéder à cette page.</p>
+                <a href="/pages/login">Se connecter</a>
             </div>
-            <div class="navbar-menu">
-                <div class="navbar-start">
-                    <a class="navbar-item" href="app_obesity.html">
-                        <span class="icon-text">
-                            <span class="icon"><i class="fas fa-chart-line"></i></span>
-                            <span>Prédiction</span>
-                        </span>
-                    </a>
-                </div>
-                <div class="navbar-end">
-                    <div class="navbar-item">
-                        <div class="buttons">
-                            <a id="admin-btn" class="button is-warning" href="admin.html">
-                                <span class="icon"><i class="fas fa-user-shield"></i></span>
-                                <strong>Admin</strong>
-                            </a>
-                            <a id="logout-btn" class="button is-danger" href="#" onclick="logout()">
-                                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
-                                <span>Déconnexion</span>
-                            </a>
-                        </div>
+            
+            <div id="adminContent" class="hidden">
+                <!-- Statistiques -->
+                <h3>Statistiques générales</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalUsers">-</div>
+                        <div>Utilisateurs totaux</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="activeUsers">-</div>
+                        <div>Utilisateurs actifs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="inactiveUsers">-</div>
+                        <div>Utilisateurs inactifs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalPredictions">-</div>
+                        <div>Prédictions totales</div>
+                    </div>
+                </div>
+                
+                <!-- Liste des utilisateurs -->
+                <div class="users-section">
+                    <h3>Gestion des utilisateurs</h3>
+                    
+                    <div id="loadingUsers" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Chargement des utilisateurs...</p>
+                    </div>
+                    
+                    <table class="user-table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom d'utilisateur</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Statut</th>
+                                <th>Date création</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </nav>
-    <main class="section">
-        <div class="container is-max-widescreen">
-            <h1 class="title has-text-centered">Tableau de Bord Administrateur</h1>
-            <div class="columns">
-                <div class="column is-one-quarter">
-                    <div class="box">
-                        <h2 class="title is-5">Statistiques</h2>
-                        <div class="content">
-                            <p><strong>Utilisateurs totaux:</strong> <span id="totalUsers"></span></p>
-                            <p><strong>Prédictions totales:</strong> <span id="totalPredictions"></span></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="column">
-                    <div class="box">
-                        <h2 class="title is-5">Gestion des utilisateurs</h2>
-                        <div class="table-container">
-                            <table class="table is-striped is-hoverable is-fullwidth" id="usersTable">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Nom d'utilisateur</th>
-                                        <th>Email</th>
-                                        <th>Rôle</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    </tbody>
-                            </table>
-                        </div>
-                        <div id="usersMessage" class="notification is-info is-hidden">
-                            Aucun utilisateur trouvé.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+    </div>
+
     <script>
-        const token = localStorage.getItem('access_token');
-        const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
-
-        // Vérification de l'authentification et du rôle
-        if (!token || !payload || payload.role !== 'admin') {
-            window.location.href = 'login.html';
-        }
-
-        function logout() {
-            localStorage.removeItem('access_token');
-            window.location.href = 'login.html';
-        }
-
-        async function fetchStats() {
+        let currentAdminId = null;
+        
+        // Vérification de la connexion au chargement
+        window.onload = async function() {
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            
+            if (!token || !username) {
+                document.getElementById('accessDenied').classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                // Vérifie si l'utilisateur est admin
+                const response = await fetch('/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const user = await response.json();
+                
+                if (response.ok && user.role === 'admin') {
+                    currentAdminId = user.id;
+                    document.getElementById('currentAdmin').textContent = username;
+                    document.getElementById('adminWelcome').classList.remove('hidden');
+                    document.getElementById('adminContent').classList.remove('hidden');
+                    
+                    // Charge les données
+                    await loadStats();
+                    await loadUsers();
+                } else {
+                    document.getElementById('accessDenied').classList.remove('hidden');
+                }
+                
+            } catch (error) {
+                document.getElementById('accessDenied').classList.remove('hidden');
+            }
+        };
+        
+        // Chargement des statistiques
+        async function loadStats() {
+            const token = localStorage.getItem('token');
+            
             try {
                 const response = await fetch('/admin/stats', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
+                
                 const stats = await response.json();
-                document.getElementById('totalUsers').textContent = stats.total_users;
-                document.getElementById('totalPredictions').textContent = stats.total_predictions;
+                
+                if (response.ok) {
+                    document.getElementById('totalUsers').textContent = stats.total_users;
+                    document.getElementById('activeUsers').textContent = stats.active_users;
+                    document.getElementById('inactiveUsers').textContent = stats.inactive_users;
+                    document.getElementById('totalPredictions').textContent = stats.total_predictions;
+                }
+                
             } catch (error) {
-                console.error("Erreur de chargement des statistiques", error);
+                showAlert('Erreur lors du chargement des statistiques', 'error');
             }
         }
-
-        async function fetchUsers() {
+        
+        // Chargement de la liste des utilisateurs
+        async function loadUsers() {
+            const token = localStorage.getItem('token');
+            const loadingDiv = document.getElementById('loadingUsers');
+            const tableBody = document.getElementById('usersTableBody');
+            
+            loadingDiv.classList.remove('hidden');
+            
             try {
                 const response = await fetch('/admin/users', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
-                const users = await response.json();
-                const usersTableBody = document.querySelector('#usersTable tbody');
-                usersTableBody.innerHTML = '';
-                if (users.users.length > 0) {
-                    users.users.forEach(user => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${user.id}</td>
-                            <td>${user.username}</td>
-                            <td>${user.email}</td>
-                            <td>${user.role}</td>
-                            <td>
-                                <button class="button is-danger is-small delete-user-btn" data-id="${user.id}">Supprimer</button>
-                            </td>
-                        `;
-                        usersTableBody.appendChild(row);
-                    });
-                    document.getElementById('usersMessage').classList.add('is-hidden');
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayUsers(data.users);
                 } else {
-                    document.getElementById('usersMessage').classList.remove('is-hidden');
+                    showAlert(data.detail || 'Erreur lors du chargement des utilisateurs', 'error');
                 }
+                
             } catch (error) {
-                console.error("Erreur de chargement des utilisateurs", error);
+                showAlert('Erreur de réseau', 'error');
+            } finally {
+                loadingDiv.classList.add('hidden');
             }
         }
-
-        document.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('delete-user-btn')) {
-                const userId = e.target.dataset.id;
-                const confirmation = confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?");
-                if (confirmation) {
-                    try {
-                        const response = await fetch(`/admin/users/${userId}`, {
-                            method: 'DELETE',
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (response.ok) {
-                            alert("Utilisateur supprimé avec succès.");
-                            fetchUsers();
-                            fetchStats();
-                        } else {
-                            const errorData = await response.json();
-                            alert(`Erreur: ${errorData.detail}`);
-                        }
-                    } catch (error) {
-                        alert("Erreur lors de la suppression.");
-                    }
+        
+        // Affichage de la liste des utilisateurs
+        function displayUsers(users) {
+            const tableBody = document.getElementById('usersTableBody');
+            tableBody.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                const date = new Date(user.created_at).toLocaleDateString('fr-FR');
+                const statusClass = user.is_active ? 'status-active' : 'status-inactive';
+                const statusText = user.is_active ? 'Actif' : 'Inactif';
+                const roleClass = user.role === 'admin' ? 'role-admin' : 'role-user';
+                
+                // Définit les actions disponibles
+                let actions = '';
+                if (user.id !== currentAdminId) {
+                    const toggleText = user.is_active ? 'Désactiver' : 'Activer';
+                    const toggleClass = user.is_active ? 'btn-warning' : 'btn-success';
+                    
+                    actions = `
+                        <button class="btn ${toggleClass}" onclick="toggleUserActive(${user.id})">
+                            ${toggleText}
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteUser(${user.id}, '${user.username}')">
+                            Supprimer
+                        </button>
+                    `;
+                } else {
+                    actions = '<span style="color: #666;">Vous</span>';
                 }
+                
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td><span class="${roleClass}">${user.role}</span></td>
+                    <td><span class="${statusClass}">${statusText}</span></td>
+                    <td>${date}</td>
+                    <td>${actions}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Active/désactive un utilisateur
+        async function toggleUserActive(userId) {
+            const token = localStorage.getItem('token');
+            
+            if (!confirm('Êtes-vous sûr de vouloir changer le statut de cet utilisateur?')) {
+                return;
             }
-        });
-
-        fetchStats();
-        fetchUsers();
+            
+            try {
+                const response = await fetch(`/admin/users/${userId}/toggle-active`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert(data.message, 'success');
+                    await loadUsers();  // Recharge la liste
+                    await loadStats();  // Recharge les stats
+                } else {
+                    showAlert(data.detail || 'Erreur lors de la modification', 'error');
+                }
+                
+            } catch (error) {
+                showAlert('Erreur de réseau', 'error');
+            }
+        }
+        
+        // Supprime un utilisateur
+        async function deleteUser(userId, username) {
+            const token = localStorage.getItem('token');
+            
+            if (!confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${username}"? Cette action est irréversible.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert(data.message, 'success');
+                    await loadUsers();  // Recharge la liste
+                    await loadStats();  // Recharge les stats
+                } else {
+                    showAlert(data.detail || 'Erreur lors de la suppression', 'error');
+                }
+                
+            } catch (error) {
+                showAlert('Erreur de réseau', 'error');
+            }
+        }
+        
+        // Affichage des alertes
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            // Cache l'alerte après 5 secondes
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Déconnexion
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            window.location.href = '/pages/login';
+        }
     </script>
 </body>
 </html>

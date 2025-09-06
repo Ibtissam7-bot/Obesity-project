@@ -90,5 +90,5 @@ class ModelInfo(BaseModel):
     model_version: str = "1.0"
     features: List[str]
     classes: List[str]
-    last_training_date: str = "2025-09-01"  # Tu peux changer cette date
-    accuracy: float = 0.97  # Basé sur tes résultats qui semblent très bons
+    last_training_date: str = "2025-09-01"  
+    accuracy: float = 0.97  

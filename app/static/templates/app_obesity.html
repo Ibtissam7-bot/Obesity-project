@@ -3,174 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Obesity App</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Prédiction Obésité</title>
     <style>
-        body { background-color: #f0f4f8; }
-        .box { border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
-        .hero.is-primary { background-image: linear-gradient(to right, #6a11cb 0%, #2575fc 100%); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .nav {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .nav a, .nav button {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .content {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        
+        .prediction-form, .results {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-test {
+            background: #28a745 !important;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result-card {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .probability-bar {
+            background: #e9ecef;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .history-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
-        <div class="container">
-            <div class="navbar-brand">
-                <a class="navbar-item is-size-4 has-text-weight-bold" href="/">Obesity App</a>
-            </div>
-            <div class="navbar-menu">
-                <div class="navbar-start">
-                    <a class="navbar-item" href="app_obesity.html">
-                        <span class="icon-text">
-                            <span class="icon"><i class="fas fa-chart-line"></i></span>
-                            <span>Prédiction</span>
-                        </span>
-                    </a>
-                </div>
-                <div class="navbar-end">
-                    <div class="navbar-item">
-                        <div class="buttons">
-                            <a id="admin-btn" class="button is-warning is-hidden" href="admin.html">
-                                <span class="icon"><i class="fas fa-user-shield"></i></span>
-                                <strong>Admin</strong>
-                            </a>
-                            <a id="logout-btn" class="button is-danger is-hidden" href="#" onclick="logout()">
-                                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
-                                <span>Déconnexion</span>
-                            </a>
-                            <a id="login-btn" class="button is-light is-hidden" href="login.html">
-                                <span class="icon"><i class="fas fa-sign-in-alt"></i></span>
-                                <strong>Connexion</strong>
-                            </a>
-                            <a id="register-btn" class="button is-link is-hidden" href="register.html">
-                                <span class="icon"><i class="fas fa-user-plus"></i></span>
-                                <strong>Inscription</strong>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="container">
+        <div class="header">
+            <h1>Prédiction d'Obésité</h1>
+            <p>Analysez votre risque d'obésité avec l'intelligence artificielle</p>
+            <p id="userWelcome" class="hidden">Bienvenue, <span id="currentUser"></span>!</p>
         </div>
-    </nav>
-    <main class="section">
-        <div class="container is-max-widescreen">
-            <div class="columns">
-                <div class="column is-one-third">
-                    <div class="box">
-                        <h2 class="title is-4 has-text-primary"><i class="fas fa-chart-line"></i> Faire une prédiction</h2>
-                        <p class="subtitle is-6">Entrez vos données pour évaluer votre risque d'obésité.</p>
-                        <form id="predictionForm">
-                            <div class="field">
-                                <label class="label">Âge</label>
-                                <div class="control"><input class="input" type="number" id="Age" required></div>
-                            </div>
-                            <div class="field">
-                                <label class="label">Taille (cm)</label>
-                                <div class="control"><input class="input" type="number" step="0.01" id="Height" required></div>
-                            </div>
-                            <div class="field">
-                                <label class="label">Poids (kg)</label>
-                                <div class="control"><input class="input" type="number" step="0.01" id="Weight" required></div>
-                            </div>
-                            <div class="field">
-                                <label class="label">Antécédent d'obésité familial (0 ou 1)</label>
-                                <div class="control"><input class="input" type="number" id="history" min="0" max="1" required></div>
-                            </div>
-                            <div class="field">
-                                <div class="control">
-                                    <button class="button is-primary is-fullwidth is-medium" type="submit">
-                                        <span class="icon"><i class="fas fa-flask"></i></span>
-                                        <span>Prédire</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div id="predictionMessage" class="notification is-hidden mt-3"></div>
-                        </form>
+        
+        <div class="nav">
+            <a href="/pages/login">Login</a>
+            <a href="/pages/register">Register</a>
+            <button onclick="showHistory()">Historique</button>
+            <a href="/pages/admin">Admin</a>
+            <button onclick="logout()">Déconnexion</button>
+            <a href="/docs">API Docs</a>
+        </div>
+        
+        <div class="content">
+            <!-- Formulaire de prédiction -->
+            <div class="prediction-form">
+                <h3>Saisie des données</h3>
+                <div id="alert" class="alert"></div>
+                
+                <div class="form-group">
+                    <label for="age">Âge (années):</label>
+                    <input type="number" id="age" min="1" max="150" step="0.1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="height">Taille (cm):</label>
+                    <input type="number" id="height" min="50" max="300" step="0.1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="weight">Poids (kg):</label>
+                    <input type="number" id="weight" min="10" max="500" step="0.1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="history">Hérédité familiale d'obésité:</label>
+                    <select id="history" required>
+                        <option value="">Sélectionnez...</option>
+                        <option value="0">Non (0)</option>
+                        <option value="1">Oui (1)</option>
+                    </select>
+                </div>
+                
+                <button onclick="makePrediction()">Faire la prédiction</button>
+                <button class="btn-test" onclick="testPrediction()">Test rapide</button>
+            </div>
+            
+            <!-- Résultats -->
+            <div class="results">
+                <h3>Résultats</h3>
+                <div id="predictionResult" class="hidden">
+                    <div class="result-card">
+                        <h4>Classe prédite: <span id="predictedClass"></span></h4>
+                        <p>Confiance: <span id="confidence"></span>%</p>
+                        
+                        <h5 style="margin-top: 20px;">Toutes les probabilités:</h5>
+                        <div id="allProbabilities"></div>
                     </div>
                 </div>
                 
-                <div class="column is-two-thirds">
-                    <div class="box mb-5 is-hidden" id="resultBox">
-                        <h2 class="title is-4 has-text-success"><i class="fas fa-check-circle"></i> Résultat de la prédiction</h2>
-                        <div class="columns is-vcentered">
-                            <div class="column">
-                                <p class="is-size-5 has-text-weight-bold mb-2">Classe prédite : <span id="predictedClass" class="has-text-link"></span></p>
-                                <p class="is-size-6">Confiance : <span id="confidence"></span>%</p>
-                            </div>
-                            <div class="column">
-                                <canvas id="probabilitiesChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="box" id="historyBox">
-                        <h2 class="title is-4 has-text-info"><i class="fas fa-history"></i> Historique de vos prédictions</h2>
-                        <div class="table-container">
-                            <table class="table is-striped is-hoverable is-fullwidth">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Prédiction</th>
-                                        <th>Confiance</th>
-                                        <th>Données d'entrée</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historyTableBody">
-                                    </tbody>
-                            </table>
-                        </div>
-                        <nav class="pagination is-centered" role="navigation" aria-label="pagination">
-                            <a class="pagination-previous" id="prevPageBtn">Précédent</a>
-                            <a class="pagination-next" id="nextPageBtn">Suivant</a>
-                            <ul class="pagination-list">
-                                <li><span class="pagination-link is-current" id="currentPage">1</span></li>
-                            </ul>
-                        </nav>
-                        <p id="totalPredictionsText" class="has-text-centered is-size-7 mt-2">Total : <span id="totalPredictionsCount">0</span> prédictions</p>
-                        <div id="historyMessage" class="notification is-warning is-hidden mt-3">
-                            Aucun historique de prédiction trouvé.
-                        </div>
-                    </div>
+                <div id="historySection" class="hidden">
+                    <h4>Historique des prédictions</h4>
+                    <div id="historyList"></div>
+                </div>
+                
+                <div id="noResult" style="text-align: center; color: #666;">
+                    <p>Remplissez le formulaire pour obtenir une prédiction</p>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
     <script>
-        // Vérification de l'authentification et redirection
-        const token = localStorage.getItem('access_token');
-        if (!token) { window.location.href = 'login.html'; }
-
-        // Fonction pour gérer la déconnexion
-        function logout() {
-            localStorage.removeItem('access_token');
-            window.location.href = 'login.html';
-        }
-
-        // Gestion de l'affichage des boutons en fonction du token
-        const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
-        if (token) {
-            document.getElementById('logout-btn').classList.remove('is-hidden');
-            if (payload && payload.role === 'admin') {
-                document.getElementById('admin-btn').classList.remove('is-hidden');
-            }
-        }
+        console.log('🚀 Script chargé');
         
-        // Code pour le formulaire et l'historique (identique à la version précédente)
-        let currentPage = 1;
-        const limit = 5;
-
-        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Vérification de la connexion au chargement
+        window.onload = function() {
+            console.log('📄 Page chargée');
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            
+            if (token && username) {
+                document.getElementById('currentUser').textContent = username;
+                document.getElementById('userWelcome').classList.remove('hidden');
+                console.log('✅ Utilisateur connecté:', username);
+            } else {
+                console.log('❌ Utilisateur non connecté');
+            }
+        };
+        
+        // Fonction principale de prédiction
+        async function makePrediction() {
+            console.log('🎯 makePrediction appelée');
+            
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.log('❌ Pas de token');
+                showAlert('Vous devez être connecté pour faire une prédiction', 'error');
+                return;
+            }
+            
+            // Récupère les valeurs
+            const age = document.getElementById('age').value;
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+            const history = document.getElementById('history').value;
+            
+            console.log('📊 Valeurs récupérées:', {age, height, weight, history});
+            
+            // Validation
+            if (!age || !height || !weight || history === '') {
+                showAlert('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
             const data = {
-                Age: parseFloat(document.getElementById('Age').value),
-                Height: parseFloat(document.getElementById('Height').value),
-                Weight: parseFloat(document.getElementById('Weight').value),
-                history: parseFloat(document.getElementById('history').value)
+                Age: parseFloat(age),
+                Height: parseFloat(height),
+                Weight: parseFloat(weight),
+                history: parseInt(history)
             };
-            const messageDiv = document.getElementById('predictionMessage');
+            
+            console.log('📤 Données à envoyer:', data);
+            showAlert('Prédiction en cours...', 'success');
+            
             try {
+                console.log('🌐 Envoi de la requête...');
+                
                 const response = await fetch('/predict/', {
                     method: 'POST',
                     headers: {
@@ -179,85 +301,154 @@
                     },
                     body: JSON.stringify(data)
                 });
-                const result = await response.json();
+                
+                console.log('📨 Réponse reçue, status:', response.status);
+                
                 if (response.ok) {
-                    document.getElementById('resultBox').classList.remove('is-hidden');
-                    document.getElementById('predictedClass').textContent = result.predicted_class;
-                    document.getElementById('confidence').textContent = (result.confidence_percentage).toFixed(2);
-                    
-                    const ctx = document.getElementById('probabilitiesChart').getContext('2d');
-                    const labels = Object.keys(result.all_probabilities);
-                    const data = Object.values(result.all_probabilities);
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: { labels, datasets: [{ label: 'Probabilité', data }] },
-                        options: { responsive: true }
-                    });
-
-                    fetchPredictionHistory(1);
+                    const result = await response.json();
+                    console.log('✅ Résultat:', result);
+                    displayResult(result);
+                    showAlert('Prédiction réalisée avec succès!', 'success');
                 } else {
-                    messageDiv.textContent = result.detail;
-                    messageDiv.classList.remove('is-hidden');
-                }
-            } catch (error) {
-                messageDiv.textContent = 'Erreur lors de la communication avec l\'API.';
-                messageDiv.classList.remove('is-hidden');
-            }
-        });
-
-        async function fetchPredictionHistory(page = 1) {
-            const skip = (page - 1) * limit;
-            try {
-                const response = await fetch(`/predict/history?skip=${skip}&limit=${limit}`, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const history = await response.json();
-                const historyTableBody = document.getElementById('historyTableBody');
-                historyTableBody.innerHTML = '';
-                
-                if (history.predictions.length > 0) {
-                    history.predictions.forEach(p => {
-                        const row = document.createElement('tr');
-                        const date = new Date(p.created_at).toLocaleDateString('fr-FR');
-                        row.innerHTML = `
-                            <td>${date}</td>
-                            <td>${p.predicted_class}</td>
-                            <td>${(p.confidence_percentage).toFixed(2)}%</td>
-                            <td><pre>${JSON.stringify(p.input_features, null, 2)}</pre></td>
-                        `;
-                        historyTableBody.appendChild(row);
-                    });
-                    document.getElementById('historyMessage').classList.add('is-hidden');
-                } else {
-                    document.getElementById('historyMessage').classList.remove('is-hidden');
+                    const error = await response.json();
+                    console.error('❌ Erreur API:', error);
+                    showAlert(error.detail || 'Erreur lors de la prédiction', 'error');
                 }
                 
-                document.getElementById('totalPredictionsCount').textContent = history.total;
-                document.getElementById('currentPage').textContent = page;
-                document.getElementById('prevPageBtn').disabled = page === 1;
-                document.getElementById('nextPageBtn').disabled = (page * limit) >= history.total;
-
             } catch (error) {
-                console.error('Erreur lors de la récupération de l\'historique:', error);
-                document.getElementById('historyMessage').textContent = 'Erreur lors du chargement de l\'historique.';
-                document.getElementById('historyMessage').classList.remove('is-hidden');
+                console.error('💥 Erreur réseau:', error);
+                showAlert('Erreur de réseau: ' + error.message, 'error');
             }
         }
-
-        document.getElementById('prevPageBtn').addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                fetchPredictionHistory(currentPage);
+        
+        // Fonction de test rapide
+        function testPrediction() {
+            console.log('🧪 Test rapide lancé');
+            
+            document.getElementById('age').value = 25;
+            document.getElementById('height').value = 175;
+            document.getElementById('weight').value = 70;
+            document.getElementById('history').value = 0;
+            
+            makePrediction();
+        }
+        
+        // Affichage des résultats
+        function displayResult(result) {
+            document.getElementById('noResult').classList.add('hidden');
+            document.getElementById('predictionResult').classList.remove('hidden');
+            
+            document.getElementById('predictedClass').textContent = result.predicted_class;
+            document.getElementById('confidence').textContent = result.confidence_percentage;
+            
+            // Affichage des probabilités
+            const probDiv = document.getElementById('allProbabilities');
+            probDiv.innerHTML = '';
+            
+            for (const [className, probability] of Object.entries(result.all_probabilities)) {
+                const probItem = document.createElement('div');
+                probItem.style.marginBottom = '10px';
+                
+                const percentage = (probability * 100).toFixed(2);
+                probItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>${className}</span>
+                        <span>${percentage}%</span>
+                    </div>
+                    <div class="probability-bar">
+                        <div class="probability-fill" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                
+                probDiv.appendChild(probItem);
             }
-        });
-
-        document.getElementById('nextPageBtn').addEventListener('click', () => {
-            currentPage++;
-            fetchPredictionHistory(currentPage);
-        });
-
-        fetchPredictionHistory();
+        }
+        
+        // Affichage de l'historique
+        async function showHistory() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAlert('Vous devez être connecté pour voir l\'historique', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/predict/history', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayHistory(data.predictions);
+                } else {
+                    showAlert(data.detail || 'Erreur lors de la récupération de l\'historique', 'error');
+                }
+                
+            } catch (error) {
+                showAlert('Erreur de réseau', 'error');
+            }
+        }
+        
+        // Affichage de l'historique
+        function displayHistory(predictions) {
+            document.getElementById('predictionResult').classList.add('hidden');
+            document.getElementById('noResult').classList.add('hidden');
+            document.getElementById('historySection').classList.remove('hidden');
+            
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            if (predictions.length === 0) {
+                historyList.innerHTML = '<p>Aucune prédiction dans l\'historique</p>';
+                return;
+            }
+            
+            predictions.forEach(prediction => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                const date = new Date(prediction.created_at).toLocaleString('fr-FR');
+                
+                historyItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${prediction.predicted_class}</strong>
+                            <br>
+                            <small>Confiance: ${prediction.confidence_percentage}%</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <small>${date}</small>
+                            <br>
+                            <small>Age: ${prediction.input_features.Age}, Poids: ${prediction.input_features.Weight}kg</small>
+                        </div>
+                    </div>
+                `;
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        // Affichage des alertes
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Déconnexion
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            window.location.href = '/pages/login';
+        }
     </script>
 </body>
 </html>

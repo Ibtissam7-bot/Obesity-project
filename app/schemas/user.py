@@ -3,6 +3,8 @@ from typing import Optional
 from datetime import datetime
 from app.models.user import UserRole
 
+
+
 # --- Schémas pour la création/mise à jour ---
 
 class UserCreate(BaseModel):
@@ -30,6 +32,12 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+
+# Schéma pour la connexion d'un utilisateur
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
 # --- Schémas de réponse ---
 
 class UserBase(BaseModel):
@@ -44,9 +52,21 @@ class UserBase(BaseModel):
     class Config:
         from_attributes = True  # Pour SQLAlchemy
 
-class UserResponse(UserBase):
-    """Schéma de réponse complète pour un utilisateur"""
-    updated_at: Optional[datetime] = None
+# class UserResponse(UserBase):
+#     """Schéma de réponse complète pour un utilisateur"""
+#     updated_at: Optional[datetime] = None
+
+# Schéma pour la réponse de l'API (pour afficher les infos utilisateur)
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    role: str
+    is_active: bool
+    created_at: datetime
+    # Permet à Pydantic de lire les données d'un objet ORM
+    class Config:
+        orm_mode = True
 
 class UserList(BaseModel):
     """Schéma pour la liste des utilisateurs (admin)"""
@@ -65,3 +85,10 @@ class TokenData(BaseModel):
     """Données contenues dans le token JWT"""
     username: Optional[str] = None
     user_id: Optional[int] = None
+
+
+
+class LoginResponse(BaseModel):
+    user: UserResponse
+    access_token: str
+    token_type: str

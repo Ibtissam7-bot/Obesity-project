@@ -10,7 +10,7 @@ import logging
 from app.config import settings
 from app.database import create_tables, test_connection
 from app.services.ml_service import ml_service
-from app.routers import auth, prediction, admin
+from app.routers import auth, prediction, admin, pages
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO)
@@ -41,7 +41,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.include_router(auth.router)
 app.include_router(prediction.router)
 app.include_router(admin.router)
-
+app.include_router(pages.router)
 @app.on_event("startup")
 async def startup_event():
     """Actions à effectuer au démarrage de l'application"""
