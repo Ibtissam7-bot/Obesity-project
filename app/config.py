@@ -137,16 +137,16 @@ OBESITY_CATEGORIES = {
 }
 
 # Mapping alternatif si ton modèle utilise d'autres indices
-# Tu peux changer ceci selon l'ordre réel de ton modèle
-CLASS_TO_INDEX = {
-    0: "Insufficient_Weight",
-    1: "Normal_Weight", 
-    2: "Overweight_Level_I",
-    3: "Overweight_Level_II", 
-    4: "Obesity_Type_I",
-    5: "Obesity_Type_II",
-    6: "Obesity_Type_III"
-}
+CLASS_TO_INDEX = {v: k for k, v in OBESITY_CATEGORIES.items()}
+# CLASS_TO_INDEX = {
+#     0: "Insufficient_Weight",
+#     1: "Normal_Weight", 
+#     2: "Overweight_Level_I",
+#     3: "Overweight_Level_II", 
+#     4: "Obesity_Type_I",
+#     5: "Obesity_Type_II",
+#     6: "Obesity_Type_III"
+# }
 
-# Features attendues par ton modèle
-EXPECTED_FEATURES = ["Age", "Height", "Weight", "history"]
+# Features attendues par le modèle
+EXPECTED_FEATURES =['Age','Height','Weight','history','FCVC','NCP','CH2O','FAF','TUE','CALC']

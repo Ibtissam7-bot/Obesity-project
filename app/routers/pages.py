@@ -13,6 +13,11 @@ router = APIRouter(prefix="/pages", tags=["Pages HTML"])
 # TEMPLATES_DIR = Path(__file__).parent.parent / "static" / "templates"
 TEMPLATES_DIR = Path("app/static/templates")
 
+@router.get("/home")
+def app_obesity_page():
+    """Page d'acceuil d'application """
+    return FileResponse(TEMPLATES_DIR / "home.html")
+
 @router.get("/login")
 def login_page():
     """Page de connexion"""

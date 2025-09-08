@@ -13,6 +13,13 @@ class PredictionInput(BaseModel):
     Height: float  # en cm 
     Weight: float  # en kg 
     history: float  
+    FCVC: float
+    NCP: float
+    CH2O: float
+    FAF: float
+    TUE: float
+    CALC: float
+   
     
     @validator('Age')
     def validate_age(cls, v):
@@ -38,9 +45,41 @@ class PredictionInput(BaseModel):
             raise ValueError('La valeur history doit être soit 0 si on pas d\'antécédent d\'obesite dans la famille, soit 1 si oui ')
         return v
     
+    @validator('FCVC')
+    def validate_FCVC(cls, v):
+        if v < 1 or v > 3:
+            raise ValueError('La valeur FCVC doit être entre 1 et 3')
+        return v
+    @validator('NCP')
+    def validate_NCP(cls, v):
+        if v < 1 or v > 3:
+            raise ValueError('La valeur NCP doit être entre 1 et 3')
+        return v
+    
+    @validator('CH2O')          
+    def validate_CH2O(cls, v):
+        if v < 1 or v > 3:
+            raise ValueError('La valeur CH2O doit être entre 1 et 3')
+        return v
+    @validator('FAF')
+    def validate_FAF(cls, v):
+        if v < 0 or v > 3:
+            raise ValueError('La valeur FAF doit être entre 0 et 3')
+        return v
+    @validator('TUE')
+    def validate_TUE(cls, v):   
+        if v < 0 or v > 3:
+            raise ValueError('La valeur TUE doit être entre 0 et 3')
+        return v
+    @validator('CALC')
+    def validate_CALC(cls, v):
+        if v < 0 or v > 3:
+            raise ValueError('La valeur CALC doit être entre 0 et 3')
+        return v
+
     def to_list(self) -> List[float]:
         """Convertit en liste pour le modèle ML"""
-        return [self.Age, self.Height, self.Weight, self.history]
+        return [self.Age, self.Height, self.Weight, self.history,self.FCVC,self.NCP,self.CH2O,self.FAF,self.TUE,self.CALC]
     
     def to_dict(self) -> Dict[str, float]:
         """Convertit en dictionnaire"""
@@ -48,7 +87,13 @@ class PredictionInput(BaseModel):
             "Age": self.Age,
             "Height": self.Height, 
             "Weight": self.Weight,
-            "history": float(self.history)
+            "history": float(self.history),
+            "FCVC": float(self.FCVC),
+            "NCP": float(self.NCP),
+            "CH2O": float(self.CH2O),
+            "FAF": float(self.FAF),
+            "TUE": float(self.TUE),
+            "CALC": float(self.CALC)
         }
 
 # --- Schémas de sortie ---

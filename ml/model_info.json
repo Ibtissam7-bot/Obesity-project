@@ -1,0 +1,27 @@
+{
+    "model_name": "Obesity Classification Model",
+    "model_version": "1.0",
+    "features": [
+        "Age",
+        "Height",
+        "Weight",
+        "history",
+        "FCVC",
+        "NCP",
+        "CH2O",
+        "FAF",
+        "TUE",
+        "CALC"
+    ],
+    "classes": [
+        "Normal_Weight",
+        "Overweight_Level_I",
+        "Overweight_Level_II",
+        "Obesity_Type_I",
+        "Insufficient_Weight",
+        "Obesity_Type_II",
+        "Obesity_Type_III"
+    ],
+    "last_training_date": "2025-09-08",
+    "accuracy": 0.9598108747044918
+}

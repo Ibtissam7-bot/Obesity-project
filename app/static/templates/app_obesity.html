@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -34,12 +34,22 @@
             text-align: center;
         }
         
-        .nav {
+        /* .nav {
             background: #f8f9fa;
             padding: 15px;
             text-align: center;
             border-bottom: 1px solid #ddd;
-        }
+        } */
+         .nav {
+    background: #f8f9fa;
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    display: flex; /* Utilise Flexbox */
+    justify-content: center; /* Centre les éléments horizontalement */
+    gap: 15px; /* Ajoute un espacement entre les liens et boutons */
+    flex-wrap: nowrap; /* Empêche les éléments de passer à la ligne */
+}
         
         .nav a, .nav button {
             color: #667eea;
@@ -179,7 +189,6 @@
         </div>
         
         <div class="content">
-            <!-- Formulaire de prédiction -->
             <div class="prediction-form">
                 <h3>Saisie des données</h3>
                 <div id="alert" class="alert"></div>
@@ -208,11 +217,35 @@
                     </select>
                 </div>
                 
+                <div class="form-group">
+                    <label for="fcvc">Consommation de légumes (FCVC):</label>
+                    <input type="number" id="fcvc" min="0" max="3" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="ncp">Nombre de repas principaux (NCP):</label>
+                    <input type="number" id="ncp" min="0" max="5" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="ch2o">Consommation quotidienne d'eau (CH2O):</label>
+                    <input type="number" id="ch2o" min="0" max="3" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="faf">Fréquence d'activité physique (FAF):</label>
+                    <input type="number" id="faf" min="0" max="3" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="tue">Temps d'utilisation d'appareils électroniques (TUE):</label>
+                    <input type="number" id="tue" min="0" max="2" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="calc">Consommation d'alcool (CALC):</label>
+                    <input type="number" id="calc" min="0" max="3" step="1" required>
+                </div>
+                
                 <button onclick="makePrediction()">Faire la prédiction</button>
                 <button class="btn-test" onclick="testPrediction()">Test rapide</button>
             </div>
             
-            <!-- Résultats -->
             <div class="results">
                 <h3>Résultats</h3>
                 <div id="predictionResult" class="hidden">
@@ -272,10 +305,18 @@
             const weight = document.getElementById('weight').value;
             const history = document.getElementById('history').value;
             
-            console.log('📊 Valeurs récupérées:', {age, height, weight, history});
+            // NOUVELLES VARIABLES RÉCUPÉRÉES ICI
+            const fcvc = document.getElementById('fcvc').value;
+            const ncp = document.getElementById('ncp').value;
+            const ch2o = document.getElementById('ch2o').value;
+            const faf = document.getElementById('faf').value;
+            const tue = document.getElementById('tue').value;
+            const calc = document.getElementById('calc').value;
+            
+            console.log('📊 Valeurs récupérées:', {age, height, weight, history, fcvc, ncp, ch2o, faf, tue, calc});
             
             // Validation
-            if (!age || !height || !weight || history === '') {
+            if (!age || !height || !weight || history === '' || !fcvc || !ncp || !ch2o || !faf || !tue || !calc) {
                 showAlert('Veuillez remplir tous les champs', 'error');
                 return;
             }
@@ -284,7 +325,15 @@
                 Age: parseFloat(age),
                 Height: parseFloat(height),
                 Weight: parseFloat(weight),
-                history: parseInt(history)
+                history: parseInt(history),
+                // NOUVELLES DONNÉES ENVOYÉES ICI
+                 FCVC: parseFloat(fcvc),
+                 NCP: parseFloat(ncp),
+                 CH2O: parseFloat(ch2o),
+                 FAF: parseFloat(faf),
+                 TUE: parseFloat(tue),
+                 CALC: parseFloat(calc)
+
             };
             
             console.log('📤 Données à envoyer:', data);
@@ -330,6 +379,529 @@
             document.getElementById('weight').value = 70;
             document.getElementById('history').value = 0;
             
+            // NOUVELLES DONNÉES DE TEST AJOUTÉES ICI
+            document.getElementById('fcvc').value = 2;
+            document.getElementById('ncp').value = 3;
+            document.getElementById('ch2o').value = 2;
+            document.getElementById('faf').value = 1;
+            document.getElementById('tue').value = 1;
+            document.getElementById('calc').value = 1;
+
+            makePrediction();
+        }
+        
+        // Affichage des résultats
+        function displayResult(result) {
+            document.getElementById('noResult').classList.add('hidden');
+            document.getElementById('predictionResult').classList.remove('hidden');
+            
+            document.getElementById('predictedClass').textContent = result.predicted_class;
+            document.getElementById('confidence').textContent = result.confidence_percentage;
+            
+            // Affichage des probabilités
+            const probDiv = document.getElementById('allProbabilities');
+            probDiv.innerHTML = '';
+            
+            for (const [className, probability] of Object.entries(result.all_probabilities)) {
+                const probItem = document.createElement('div');
+                probItem.style.marginBottom = '10px';
+                
+                const percentage = (probability * 100).toFixed(2);
+                probItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>${className}</span>
+                        <span>${percentage}%</span>
+                    </div>
+                    <div class="probability-bar">
+                        <div class="probability-fill" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                
+                probDiv.appendChild(probItem);
+            }
+        }
+        
+        // Affichage de l'historique
+        async function showHistory() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAlert('Vous devez être connecté pour voir l\'historique', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/predict/history', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayHistory(data.predictions);
+                } else {
+                    showAlert(data.detail || 'Erreur lors de la récupération de l\'historique', 'error');
+                }
+                
+            } catch (error) {
+                showAlert('Erreur de réseau', 'error');
+            }
+        }
+        
+        // Affichage de l'historique
+        function displayHistory(predictions) {
+            document.getElementById('predictionResult').classList.add('hidden');
+            document.getElementById('noResult').classList.add('hidden');
+            document.getElementById('historySection').classList.remove('hidden');
+            
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            if (predictions.length === 0) {
+                historyList.innerHTML = '<p>Aucune prédiction dans l\'historique</p>';
+                return;
+            }
+            
+            predictions.forEach(prediction => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                const date = new Date(prediction.created_at).toLocaleString('fr-FR');
+                
+                historyItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${prediction.predicted_class}</strong>
+                            <br>
+                            <small>Confiance: ${prediction.confidence_percentage}%</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <small>${date}</small>
+                            <br>
+                            <small>Age: ${prediction.input_features.Age}, Poids: ${prediction.input_features.Weight}kg</small>
+                        </div>
+                    </div>
+                `;
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        // Affichage des alertes
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Déconnexion
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            window.location.href = '/pages/login';
+        }
+    </script>
+</body>
+</html> -->
+
+
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédiction Obésité</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .nav {
+            background: #f8f9fa;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Centrer verticalement */
+            gap: 15px; 
+            flex-wrap: nowrap; 
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px 15px; /* Ajout d'un padding pour un meilleur aspect */
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .nav a:hover {
+            background-color: #e9ecef;
+        }
+
+        .content {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        
+        .prediction-form, .results {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-test {
+            background: #28a745 !important;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result-card {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .probability-bar {
+            background: #e9ecef;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .history-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Prédiction d'Obésité</h1>
+            <p>Analysez votre risque d'obésité avec l'intelligence artificielle</p>
+            <p id="userWelcome" class="hidden">Bienvenue, <span id="currentUser"></span>!</p>
+        </div>
+        
+        <div class="nav">
+            <a href="/pages/login">Login</a>
+            <a href="/pages/register">Register</a>
+            <a href="#" onclick="showHistory()">Historique</a>
+            <a href="/pages/admin">Admin</a>
+            <a href="#" onclick="logout()">Déconnexion</a>
+            <a href="/docs">API Docs</a>
+        </div>
+        
+        <div class="content">
+            <div class="prediction-form">
+                <h3>Saisie des données</h3>
+                <div id="alert" class="alert"></div>
+                
+                <div class="form-group">
+                    <label for="age">Âge (années):</label>
+                    <input type="number" id="age" min="1" max="150" step="0.1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="height">Taille (cm):</label>
+                    <input type="number" id="height" min="50" max="300" step="0.1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="weight">Poids (kg):</label>
+                    <input type="number" id="weight" min="10" max="500" step="0.1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="history">Hérédité familiale d'obésité:</label>
+                    <select id="history" required>
+                        <option value="">Sélectionnez...</option>
+                        <option value="0">Non (0)</option>
+                        <option value="1">Oui (1)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fcvc">Consommation de légumes (FCVC):</label>
+                    <input type="number" id="fcvc" min="0" max="3" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="ncp">Nombre de repas principaux (NCP):</label>
+                    <input type="number" id="ncp" min="0" max="5" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="ch2o">Consommation quotidienne d'eau (CH2O):</label>
+                    <input type="number" id="ch2o" min="0" max="3" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="faf">Fréquence d'activité physique (FAF):</label>
+                    <input type="number" id="faf" min="0" max="3" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="tue">Temps d'utilisation d'appareils électroniques (TUE):</label>
+                    <input type="number" id="tue" min="0" max="2" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="calc">Consommation d'alcool (CALC):</label>
+                    <input type="number" id="calc" min="0" max="3" step="1" required>
+                </div>
+                
+                <button onclick="makePrediction()">Faire la prédiction</button>
+                <button class="btn-test" onclick="testPrediction()">Test rapide</button>
+            </div>
+            
+            <div class="results">
+                <h3>Résultats</h3>
+                <div id="predictionResult" class="hidden">
+                    <div class="result-card">
+                        <h4>Classe prédite: <span id="predictedClass"></span></h4>
+                        <p>Confiance: <span id="confidence"></span>%</p>
+                        
+                        <h5 style="margin-top: 20px;">Toutes les probabilités:</h5>
+                        <div id="allProbabilities"></div>
+                    </div>
+                </div>
+                
+                <div id="historySection" class="hidden">
+                    <h4>Historique des prédictions</h4>
+                    <div id="historyList"></div>
+                </div>
+                
+                <div id="noResult" style="text-align: center; color: #666;">
+                    <p>Remplissez le formulaire pour obtenir une prédiction</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚀 Script chargé');
+        
+        // Vérification de la connexion au chargement
+        window.onload = function() {
+            console.log('📄 Page chargée');
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            
+            if (token && username) {
+                document.getElementById('currentUser').textContent = username;
+                document.getElementById('userWelcome').classList.remove('hidden');
+                console.log('✅ Utilisateur connecté:', username);
+            } else {
+                console.log('❌ Utilisateur non connecté');
+            }
+        };
+        
+        // Fonction principale de prédiction
+        async function makePrediction() {
+            console.log('🎯 makePrediction appelée');
+            
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.log('❌ Pas de token');
+                showAlert('Vous devez être connecté pour faire une prédiction', 'error');
+                return;
+            }
+            
+            // Récupère les valeurs
+            const age = document.getElementById('age').value;
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+            const history = document.getElementById('history').value;
+            
+            // NOUVELLES VARIABLES RÉCUPÉRÉES ICI
+            const fcvc = document.getElementById('fcvc').value;
+            const ncp = document.getElementById('ncp').value;
+            const ch2o = document.getElementById('ch2o').value;
+            const faf = document.getElementById('faf').value;
+            const tue = document.getElementById('tue').value;
+            const calc = document.getElementById('calc').value;
+            
+            console.log('📊 Valeurs récupérées:', {age, height, weight, history, fcvc, ncp, ch2o, faf, tue, calc});
+            
+            // Validation
+            if (!age || !height || !weight || history === '' || !fcvc || !ncp || !ch2o || !faf || !tue || !calc) {
+                showAlert('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            const data = {
+                Age: parseFloat(age),
+                Height: parseFloat(height),
+                Weight: parseFloat(weight),
+                history: parseInt(history),
+                // NOUVELLES DONNÉES ENVOYÉES ICI
+                FCVC: parseFloat(fcvc),
+                NCP: parseFloat(ncp),
+                CH2O: parseFloat(ch2o),
+                FAF: parseFloat(faf),
+                TUE: parseFloat(tue),
+                CALC: parseFloat(calc)
+
+            };
+            
+            console.log('📤 Données à envoyer:', data);
+            showAlert('Prédiction en cours...', 'success');
+            
+            try {
+                console.log('🌐 Envoi de la requête...');
+                
+                const response = await fetch('/predict/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                console.log('📨 Réponse reçue, status:', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Résultat:', result);
+                    displayResult(result);
+                    showAlert('Prédiction réalisée avec succès!', 'success');
+                } else {
+                    const error = await response.json();
+                    console.error('❌ Erreur API:', error);
+                    showAlert(error.detail || 'Erreur lors de la prédiction', 'error');
+                }
+                
+            } catch (error) {
+                console.error('💥 Erreur réseau:', error);
+                showAlert('Erreur de réseau: ' + error.message, 'error');
+            }
+        }
+        
+        // Fonction de test rapide
+        function testPrediction() {
+            console.log('🧪 Test rapide lancé');
+            
+            document.getElementById('age').value = 25;
+            document.getElementById('height').value = 175;
+            document.getElementById('weight').value = 70;
+            document.getElementById('history').value = 0;
+            
+            // NOUVELLES DONNÉES DE TEST AJOUTÉES ICI
+            document.getElementById('fcvc').value = 2;
+            document.getElementById('ncp').value = 3;
+            document.getElementById('ch2o').value = 2;
+            document.getElementById('faf').value = 1;
+            document.getElementById('tue').value = 1;
+            document.getElementById('calc').value = 1;
+
             makePrediction();
         }
         
