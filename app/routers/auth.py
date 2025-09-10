@@ -13,7 +13,6 @@ from app.config import settings
 # Créez votre routeur
 router = APIRouter(prefix="/auth",tags=["Authentification"])
 
-
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     """
@@ -30,38 +29,6 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     # Utilisez votre service pour créer l'utilisateur
     new_user = create_user(db, user)
     return {"message": "Utilisateur enregistré avec succès"}
-
-
-# @router.post("/login", response_model=Token)
-# def login_for_access_token(
-#     user_data: UserLogin, 
-#     db: Session = Depends(get_db)
-# ):
-#     """
-#     Authentifie l'utilisateur et renvoie un token JWT.
-#     """
-#     # Authentifie l'utilisateur
-#     user = AuthService.authenticate_user(db, user_data.username, user_data.password)
-    
-#     # Gère les échecs d'authentification
-#     if not user:
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Identifiants invalides",
-#             headers={"WWW-Authenticate": "Bearer"},
-#         )
-    
-#     # Définit l'expiration du token
-#     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
-    
-#     # Crée le token
-#     access_token = AuthService.create_access_token(
-#         data={"sub": user.username, "user_id": user.id}, 
-#         expires_delta=access_token_expires
-#     )
-    
-#     # Renvoie le token
-#     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/login", response_model=LoginResponse)
 def login_for_access_token(

@@ -3,15 +3,26 @@ from typing import Optional
 from datetime import datetime
 from app.models.user import UserRole
 
-
+class UserBase(BaseModel):
+    """Schéma de base d'un utilisateur (sans mot de passe)"""
+    id: int
+    username: str
+    email: str
+    is_active: bool
+    role: UserRole
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True  # Pour SQLAlchemy
 
 # --- Schémas pour la création/mise à jour ---
-
 class UserCreate(BaseModel):
     """Schéma pour créer un utilisateur (register)"""
     username: str
     email: EmailStr
     password: str
+    role: Optional[UserRole] = UserRole.USER  # Par défaut USER
+
     
     @validator('username')
     def validate_username(cls, v):
@@ -40,17 +51,7 @@ class UserLogin(BaseModel):
 
 # --- Schémas de réponse ---
 
-class UserBase(BaseModel):
-    """Schéma de base d'un utilisateur (sans mot de passe)"""
-    id: int
-    username: str
-    email: str
-    is_active: bool
-    role: UserRole
-    created_at: datetime
-    
-    class Config:
-        from_attributes = True  # Pour SQLAlchemy
+
 
 # class UserResponse(UserBase):
 #     """Schéma de réponse complète pour un utilisateur"""
@@ -66,7 +67,7 @@ class UserResponse(BaseModel):
     created_at: datetime
     # Permet à Pydantic de lire les données d'un objet ORM
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserList(BaseModel):
     """Schéma pour la liste des utilisateurs (admin)"""

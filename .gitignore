@@ -1,1 +1,6 @@
 .env
+debug.py
+make_admin.py
+run_dev.py
+start.sh
+db/wait_for_db.py

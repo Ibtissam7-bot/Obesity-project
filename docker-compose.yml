@@ -1,0 +1,65 @@
+# version: "3.9"
+# services:
+#   db:
+#     image: postgres:15
+#     container_name: obesity
+#     restart: always
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: azerty
+#       POSTGRES_DB: obesity
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - db_data:/var/lib/postgresql/data
+#   backend:
+#     build: ./app
+#     container_name: backend
+#     restart: always
+#     depends_on:
+#       - db
+#     environment:
+#       DATABASE_URL:  postgresql+psycopg2://postgres:azerty@db:5432/obesity
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - ./app:/app
+
+# volumes:
+#   db_data:
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    container_name: obesity
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: azerty
+      POSTGRES_DB: obesity
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user"]
+      interval: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  backend:
+    build: 
+      context: . # <--- INDIQUER QUE LE CONTEXTE DE BUILD EST LA RACINE DU PROJET
+      dockerfile: Dockerfile # <--- INDIQUER OÙ SE TROUVE LE DOCKERFILE
+    container_name: backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:azerty@db:5432/obesity
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app # <--- IMPORTANT : Monter TOUT le répertoire racine de l'hôte vers /app dans le conteneur
+
+volumes:
+  db_data:
+

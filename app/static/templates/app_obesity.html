@@ -689,97 +689,97 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Prédiction d'Obésité</h1>
-            <p>Analysez votre risque d'obésité avec l'intelligence artificielle</p>
-            <p id="userWelcome" class="hidden">Bienvenue, <span id="currentUser"></span>!</p>
+            <h1>Obesity prediction</h1>
+            <p>Analyse your Obesity risk with AI tools</p>
+            <p id="userWelcome" class="hidden">Hello back, <span id="currentUser"></span> !</p>
         </div>
         
         <div class="nav">
-            <a href="/pages/login">Login</a>
-            <a href="/pages/register">Register</a>
+            <a href="/pages/home">Home</a>
+            <a href="/pages/register">New account</a>
             <a href="#" onclick="showHistory()">Historique</a>
             <a href="/pages/admin">Admin</a>
-            <a href="#" onclick="logout()">Déconnexion</a>
             <a href="/docs">API Docs</a>
+            <a href="#" onclick="logout()">Déconnexion</a>
         </div>
         
         <div class="content">
             <div class="prediction-form">
-                <h3>Saisie des données</h3>
+                <h3> Enter your informations:</h3>
                 <div id="alert" class="alert"></div>
                 
                 <div class="form-group">
-                    <label for="age">Âge (années):</label>
+                    <label for="age">Age (years):</label>
                     <input type="number" id="age" min="1" max="150" step="0.1" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="height">Taille (cm):</label>
+                    <label for="height">Height (cm):</label>
                     <input type="number" id="height" min="50" max="300" step="0.1" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="weight">Poids (kg):</label>
+                    <label for="weight">Weight (kg):</label>
                     <input type="number" id="weight" min="10" max="500" step="0.1" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="history">Hérédité familiale d'obésité:</label>
+                    <label for="history"> Family history with obesity</label>
                     <select id="history" required>
-                        <option value="">Sélectionnez...</option>
+                        <option value="">Choose...</option>
                         <option value="0">Non (0)</option>
                         <option value="1">Oui (1)</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label for="fcvc">Consommation de légumes (FCVC):</label>
+                    <label for="fcvc"> Consumption of vegetables (FCVC):</label>
                     <input type="number" id="fcvc" min="0" max="3" step="1" required>
                 </div>
                 <div class="form-group">
-                    <label for="ncp">Nombre de repas principaux (NCP):</label>
+                    <label for="ncp"> Number of main meals (NCP):</label>
                     <input type="number" id="ncp" min="0" max="5" step="1" required>
                 </div>
                 <div class="form-group">
-                    <label for="ch2o">Consommation quotidienne d'eau (CH2O):</label>
+                    <label for="ch2o">Daily water consumption (CH2O):</label>
                     <input type="number" id="ch2o" min="0" max="3" step="1" required>
                 </div>
                 <div class="form-group">
-                    <label for="faf">Fréquence d'activité physique (FAF):</label>
+                    <label for="faf"> Frequency of physical activity (FAF):</label>
                     <input type="number" id="faf" min="0" max="3" step="1" required>
                 </div>
                 <div class="form-group">
-                    <label for="tue">Temps d'utilisation d'appareils électroniques (TUE):</label>
+                    <label for="tue">Time spent using electronic devices (TUE):</label>
                     <input type="number" id="tue" min="0" max="2" step="1" required>
                 </div>
                 <div class="form-group">
-                    <label for="calc">Consommation d'alcool (CALC):</label>
+                    <label for="calc"> Alcohol consumption (CALC):</label>
                     <input type="number" id="calc" min="0" max="3" step="1" required>
                 </div>
                 
-                <button onclick="makePrediction()">Faire la prédiction</button>
-                <button class="btn-test" onclick="testPrediction()">Test rapide</button>
+                <button onclick="makePrediction()"> Make prediction 📈</button>
+                <button class="btn-test" onclick="testPrediction()"> Quick test</button>
             </div>
             
             <div class="results">
-                <h3>Résultats</h3>
+                <h3>Results</h3>
                 <div id="predictionResult" class="hidden">
                     <div class="result-card">
-                        <h4>Classe prédite: <span id="predictedClass"></span></h4>
+                        <h4> Prédicted class: <span id="predictedClass"></span></h4>
                         <p>Confiance: <span id="confidence"></span>%</p>
                         
-                        <h5 style="margin-top: 20px;">Toutes les probabilités:</h5>
+                        <h5 style="margin-top: 20px;"> All probabilities:</h5>
                         <div id="allProbabilities"></div>
                     </div>
                 </div>
                 
                 <div id="historySection" class="hidden">
-                    <h4>Historique des prédictions</h4>
+                    <h4>Predictions history</h4>
                     <div id="historyList"></div>
                 </div>
                 
                 <div id="noResult" style="text-align: center; color: #666;">
-                    <p>Remplissez le formulaire pour obtenir une prédiction</p>
+                    <p>Fill out the form to get your prediction😊 </p>
                 </div>
             </div>
         </div>
@@ -841,7 +841,6 @@
                 Height: parseFloat(height),
                 Weight: parseFloat(weight),
                 history: parseInt(history),
-                // NOUVELLES DONNÉES ENVOYÉES ICI
                 FCVC: parseFloat(fcvc),
                 NCP: parseFloat(ncp),
                 CH2O: parseFloat(ch2o),
