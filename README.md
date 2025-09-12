@@ -37,6 +37,8 @@ API complète de prédiction d'obésité avec Machine Learning, authentification
 
 └── docker-compose.yml     # Configuration Docker
 
+└── make_admin.py    # Initialiser un admin par défaut
+
 └── Dockerfile    # Configuration Docker
 
 └── requirements.txt     # Configuration Docker
@@ -95,7 +97,7 @@ Modifie le fichier .env selon tes paramètres
 
 **Crée l'admin par défaut**
 
-python create_admin.py
+python make_admin.py
 
 **Lance l'application localement à travers:** uvicorn app.main:app --reload
 
