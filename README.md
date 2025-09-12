@@ -112,7 +112,9 @@ docker run -d -p 8000:8000 bissam7dock/obesity:latest
 
 **Accède à l'application**
  Home: http://localhost:8000/pages/home
+ 
  Interface : http://localhost:8000/pages/login  
+ 
  API Docs : http://localhost:8000/docs
 
 # Démarre l'application
@@ -120,30 +122,32 @@ docker run -d -p 8000:8000 bissam7dock/obesity:latest
 1. Connexion Admin par défaut
 
 URL : http://localhost:8000/pages/login
+
 Username : admin
+
 Password : admin123
 
 2. Créer un utilisateur
 
-URL : http://localhost:8000/pages/register
-Remplis le formulaire d'inscription
+URL : http://localhost:8000/pages/register ---> Remplis le formulaire d'inscription
 
 3. Faire une prédiction
 
 URL : http://localhost:8000/pages/app
-Connecte-toi et remplis le formulaire
-Ou clique sur "Test rapide" pour tester
+
+Connecte-toi et remplis le formulaire, ou clique sur "Test rapide" pour tester
 
 4. Interface Admin
+Gestion des utilisateurs et statistiques ---> **URL** : http://localhost:8000/pages/admin
 
-URL : http://localhost:8000/pages/admin
-Gestion des utilisateurs et statistiques
 
 🔧 API Endpoints
 **Authentification**
 
 POST /auth/register - Inscription
+
 POST /auth/login - Connexion
+
 GET /auth/me - Info utilisateur actuel
 
 **Prédictions**
