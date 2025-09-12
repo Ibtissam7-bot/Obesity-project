@@ -20,6 +20,7 @@ API complète de prédiction d'obésité avec Machine Learning, authentification
 🐳 Docker Ready : Déploiement avec Docker Compose
 
 🏗️ Architecture
+
 ├── app/                    # Code principal FastAPI
 
 │   ├── models/            # Modèles SQLAlchemy (User, Prediction)
