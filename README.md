@@ -2,15 +2,21 @@
 API complète de prédiction d'obésité avec Machine Learning, authentification JWT et interface d'administration.
 
 **Réalisé par : SANNAKY Ibtissam**
+
 **Courriel: bissamsannaky@gmail.com**
 
 # 🚀 Fonctionnalités
 
 🤖 Prédiction ML : Modèle RandomForest pour classifier les types d'obésité
+
 🔐 Authentification JWT : Connexion sécurisée avec tokens
+
 📊 Interface web : Pages HTML pour utiliser l'API facilement
+
 👑 Panel Admin : Gestion des utilisateurs et statistiques
+
 📈 Historique : Sauvegarde des prédictions par utilisateur
+
 🐳 Docker Ready : Déploiement avec Docker Compose
 
 🏗️ Architecture
@@ -38,39 +44,59 @@ API complète de prédiction d'obésité avec Machine Learning, authentification
 Le modèle utilise ces caractéristiques pour prédire l'obésité :
 
 Age : Âge en années
+
 Height : Taille en cm
+
 Weight : Poids en kg
+
 history : Hérédité familiale (0=Non, 1=Oui)
+
 Consumption of vegetables (FCVC)
+
 Number of main meals (NCP)
+
 Daily water consumption (CH2O)
+
 Frequency of physical activity (FAF)
+
 Time spent using electronic devices (TUE)
+
 Alcohol consumption (CALC)
 
 ## 🎯 Classes de sortie
 
 Insufficient_Weight
+
 Normal_Weight
+
 Obesity_Type_I
+
 Obesity_Type_II
+
 Obesity_Type_III
+
 Overweight_Level_I
+
 Overweight_Level_II
 
 ## 🚀 Démarrage rapide
 **Option 1 : Docker Compose (Recommandé)**
-bash# Clone le projet
+
+Clone le projet
+
 git clone https://github.com/Ibtissam7-bot/Obesity-project.git
+
 cd Obesity-project
 
 **Configuration de la base de données**
+
 Modifie le fichier .env selon tes paramètres
+
 **Crée l'admin par défaut**
+
 python create_admin.py
 
-**Lance l'application localement à travers:**
-uvicorn app.main:app --reload
+**Lance l'application localement à travers:** uvicorn app.main:app --reload
 
 ## Démarrage avec Docker
 #### 1. Télécharger l'image
@@ -111,32 +137,36 @@ URL : http://localhost:8000/pages/admin
 Gestion des utilisateurs et statistiques
 
 🔧 API Endpoints
-Authentification
+**Authentification**
 
 POST /auth/register - Inscription
 POST /auth/login - Connexion
 GET /auth/me - Info utilisateur actuel
 
-Prédictions
+**Prédictions**
 
 POST /predict/ - Nouvelle prédiction
+
 GET /predict/history - Historique personnel
+
 GET /predict/metrics - Informations du modèle
 
-Administration (Admin uniquement)
+**Administration (Admin uniquement)**
 
 GET /admin/users - Liste des utilisateurs
+
 DELETE /admin/users/{id} - Supprimer un utilisateur
-PUT /admin/users/{id}/toggle-active - Activer/désactiver
+
 GET /admin/stats - Statistiques générales
 
-## 🐳 Docker Hub
+### 🐳 Docker Hub
 Image disponible sur Docker Hub
+
 bashdocker pull bissam7dock/obesity:latest
 
 
-# Test avec les pages HTML
-# Aller sur http://localhost:8000/pages/app
+#### Test avec les pages HTML
+**Aller sur http://localhost:8000/pages/app**, puis faire un test rapide.
 
 ## 📊 Métriques du modèle utilisé
 Le modèle RandomForest obtient d'excellentes performances :
